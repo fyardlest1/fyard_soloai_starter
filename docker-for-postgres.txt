@@ -1,7 +1,7 @@
 Here’s a fully converted PostgreSQL version of your Docker Compose setup. 
 Preserved your volume structure, Mautic mounts, and Strapi integration while switching the database from MySQL → PostgreSQL.
 
-docker-compose.yml
+If you are using PostgreSQL copy/paste the following to your docker-compose.yml:
 
 x-soloai-volumes:
   &soloai-volumes
@@ -148,3 +148,4 @@ volumes:
 networks:
   default:
     name: ${COMPOSE_PROJECT_NAME}-docker
+
