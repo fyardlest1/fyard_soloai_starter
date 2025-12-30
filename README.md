@@ -40,17 +40,50 @@ When prompted, select the following options:
 
 This will set up your SvelteKit project with internationalization support for 12 languages and all necessary development tools.
 
-### 3. Configure Environment Variables
+**Open your project foder in a new VS Code:**
+
+```bash
+code .
+```
+
+- Once the project has been successfully created, enter the new folder in the terminal with:
+
+```bash
+cd nucamp_soloai
+```
+
+```bash
+Run the app with:
+```
+
+```bash
+npm run dev -- --open
+```
+
+### 3. Configure Environment Variables / Docker Initial Setup
 
 #### Create and Configure `.env` File
 
-Copy the example environment file:
+**To do so, just copy the example environment file, running the command:**
+
+- If you are already inside nucamp_soloai run:
 
 ```bash
 cp .env.example .env
 ```
 
+- If `.env.example` is outside the folder, run:
+
+```bash
+cp .env.example nucamp_soloai/.env
+```
+
+Open your `.env` file and change the `BASE_PATH` to your desired path. This is where you want Docker to store your files.
 Edit the `.env` file and update the following variables:
+
+- you can used the same file path where your project is in, ex: /C/Users/mycomputer/OneDrive/Desktop/NUCAMP-AI/nucamp_soloai
+
+To find your project path run: `pwd`
 
 **CRITICAL: Update BASE_PATH**
 ```env
@@ -59,6 +92,161 @@ BASE_PATH=/absolute/path/to/your/docker-volumes
 Replace this with an absolute path where Docker volumes will be stored. Example:
 - Linux/Mac: `/home/username/docker-volumes/soloai`
 - Windows: `D:/docker-volumes/soloai` or `/mnt/d/docker-volumes/soloai` (WSL)
+
+- Save the file.
+- Run the below command in your terminal, this command starts all the containers in the background for Strapi, Mautic, and MySQL (or Postgres):
+
+```bash
+docker compose up -d
+```
+
+- When this is done, check that everything is running with:
+
+```bash
+docker compose ps
+```
+
+Alternatively, you can view the running containers on Docker Desktop.
+Your full stack is now live and ready for development.
+
+**Final Touch**
+- Add your PRD from the last course into the /docs folder of your project.
+
+- To Stop all running containers:
+
+```bash
+docker stop $(docker ps -q)
+```
+
+- Alternative: Stop Docker Compose services.
+If your containers were started with Docker Compose:
+
+```bash
+docker compose down
+```
+
+- Force stop (only if needed)
+If a container refuses to stop:
+
+```bash
+docker kill $(docker ps -q)
+```
+
+- Clean shutdown workflow (best practice)
+
+```bash
+docker compose down
+```
+
+```bash
+docker system prune
+```
+
+- docker system prune removes unused containers, networks, and images (not volumes unless you add --volumes).
+
+
+
+### 4. Feature: Strapi and Mautic config and routes
+
+Configure basic settings of Strapi and Mautic, then use your AI Vibe Coding tool to generate the project routes.
+
+**Step 1: Prepare Your Environment**
+- Make sure you have Docker and Docker Compose installed, using the (`docker-compose.yml`), (`docker compose up -d`).
+- Make sure your AI tool (Claude Code, Gemini CLI, etc.) is installed and ready (`docker compose ps`).
+- Check that all containers are running (`docker ps`). You should see strapi, mautic, and mautic-db.
+
+**Step 2: Configure Mautic**
+- Open http://localhost:8080/index.php/installer or http://localhost:8080
+- Click "Next Step"
+
+![alt text](images/mautic1.png)
+
+- Go through the Mautic installation wizard:
+- Enter database settings base on your `.env` file:
+
+EX:
+
+MYSQL_DATABASE=mautic_db
+MYSQL_USER=mautic_db_user
+MYSQL_STRAPI_USER=strapi_db_user
+MYSQL_PASSWORD=superSecretUserPwd
+
+![alt text](images/mautic2.png)
+
+- when done, click "Next Step"
+
+- Create an admin account by filling the following (username, password, firstname, lastname, email).
+
+![alt text](images/mautic3.png)
+
+- Verify Mautic loads and the dashboard is functional by login to your new account.
+
+![alt text](images/mautic4.png)
+
+- If you see the following, you've successfully configure Mautic
+
+![alt text](images/mautic5.png)
+
+**Step 3: Configure Strapi**
+- Open your browser and go to http://localhost:1337
+- You’ll see the Strapi setup page:
+
+![alt text](images/strapi1.png)
+
+- Create an admin account: feel your credential information ( firstname, lastname, password, email...)
+- You can skip the next windor or fill it, it's up to you:
+
+![alt text](images/strapi2.png)
+
+- Finish the initial configuration. Verify Strapi is working by checking that the dashboard loads.
+
+![alt text](images/strapi3.png)
+
+
+**Step 4: Add Strapi Language support**
+- Click on Settings -> Internationalization -> Add new locale
+- Add each language individually, and click save
+
+![alt text](images/strapi4.png)
+
+List of Languages for Strapi
+    English (en)
+    French (fr)
+    Hindi (hi)
+    Spanish (es)
+    Portuguese (pt)
+    German (de)
+    Italian (it)
+    Urdu (ur)
+    Finnish (fi)
+    Norwegian (nb)
+    Arabic (ar)
+    Russian (ru)
+
+
+
+
+**Step 5: Verify Backend Setup**
+
+Check database files:
+
+Strapi: ./strapi/data/strapi.db
+
+Mautic: Docker volume mautic-db-data
+
+Ensure admin accounts are created.
+
+Run simple API calls to check endpoints:
+
+Strapi: curl http://localhost:1337/api
+
+Mautic: curl http://localhost:8080/api/contacts
+
+
+
+
+
+
 
 **Configure API Keys**
 ```env
