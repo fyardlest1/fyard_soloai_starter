@@ -1,0 +1,246 @@
+If you want to replicate the same setup but using Django instead of SvelteKit, the main changes will be in the frontend framework initialization and some Docker configuration. 
+Everything else (MySQL/Postgres, Mautic, Strapi) can remain largely the same. Here’s a step-by-step breakdown of what to modify:
+
+This is production-grade, Docker-ready, and preconfigured for 12 languages.
+
+SoloAI Starter — Django Edition (with i18n like Paraglide)
+
+A complete backend-first development environment using Django, Django REST Framework, MySQL/Postgres, Strapi, Mautic, and Docker, with built-in multi-language support.
+
+1. Prerequisites
+- Docker (v20.10+)
+- Docker Compose (v2+)
+- Python 3.11+
+- Git
+
+2. Project Structure (Final Target)
+nucamp_soloai/
+│
+├── backend/
+│   ├── manage.py
+│   ├── config/
+│   │   ├── settings.py
+│   │   ├── urls.py
+│   │   └── wsgi.py
+│   ├── core/
+│   └── locale/
+│
+├── docker/
+│   ├── django/
+│   │   └── Dockerfile
+│
+├── docker-compose.yml
+├── .env
+├── requirements.txt
+└── README.md
+
+
+3. Clone the Repository
+You can keep this step exactly the same:
+
+git clone https://github.com/fyardlest1/fyard_soloai_starter fyard_soloai_django
+cd fyard_soloai_django
+
+4. Django Project Initialization
+Create virtual environment:
+
+# Create the virtual environment
+python -m venv venv
+
+# Activate it
+# Windows:
+venv\Scripts\activate
+# Mac/Linux:
+source venv/bin/activate
+
+Install core dependencies:
+
+pip install django djangorestframework python-dotenv mysqlclient django-cors-headers
+
+Create project and app:
+
+django-admin startproject config .
+python manage.py startapp core
+
+4. Django Internationalization (Paraglide Equivalent)
+settings.py — i18n Configuration
+
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+USE_I18N = True
+USE_L10N = True
+USE_TZ = True
+
+LANGUAGE_CODE = 'en'
+
+LANGUAGES = [
+    ('en', 'English'),
+    ('fr', 'French'),
+    ('hi', 'Hindi'),
+    ('es', 'Spanish'),
+    ('pt', 'Portuguese'),
+    ('de', 'German'),
+    ('it', 'Italian'),
+    ('ur', 'Urdu'),
+    ('fi', 'Finnish'),
+    ('nb', 'Norwegian'),
+    ('ar', 'Arabic'),
+    ('ru', 'Russian'),
+]
+
+LOCALE_PATHS = [
+    BASE_DIR / 'locale',
+]
+
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',  # REQUIRED
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+]
+
+
+5. Mark Translatable Strings:
+
+- Python
+from django.utils.translation import gettext_lazy as _
+
+title = _("Welcome to SoloAI")
+
+- Or: Mark Text for Translation
+
+from django.utils.translation import gettext as _
+
+def home(request):
+    context = {
+        "title": _("Build MVPs Faster with SoloAI")
+    }
+    return render(request, "home.html", context)
+
+
+- Templates
+{% load i18n %}
+<h1>{% trans "Build MVPs Faster with AI" %}</h1>
+
+6. Generate Translation Files:
+
+django-admin makemessages -l fr
+django-admin makemessages -l hi
+django-admin makemessages -l es
+django-admin makemessages -l pt
+django-admin makemessages -l de
+django-admin makemessages -l it
+django-admin makemessages -l ur
+django-admin makemessages -l fi
+django-admin makemessages -l nb
+django-admin makemessages -l ar
+django-admin makemessages -l ru
+
+
+7. URL-Based Language Routing (Best Practice):
+
+- urls.py
+
+from django.conf.urls.i18n import i18n_patterns
+from django.urls import path
+from core import views
+
+urlpatterns = [
+    path('i18n/', include('django.conf.urls.i18n')),
+]
+
+urlpatterns += i18n_patterns(
+    path('', views.home, name='home'),
+)
+
+
+- Result (SEO-friendly and scalable.):
+
+/en/
+/fr/
+/de/
+/ar/
+
+
+8. Compile Translations:
+
+django-admin compilemessages
+
+
+9. Language Switcher (UI)
+
+<form action="{% url 'set_language' %}" method="post">
+  {% csrf_token %}
+  <select name="language">
+    {% get_available_languages as LANGUAGES %}
+    {% for lang in LANGUAGES %}
+      <option value="{{ lang.0 }}">{{ lang.1 }}</option>
+    {% endfor %}
+  </select>
+  <button type="submit">{% trans "Change" %}</button>
+</form>
+
+
+10. Docker Integration (Django Service) - Dockerfile
+
+FROM python:3.12-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY backend /app
+
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+
+
+11. docker-compose.yml (Relevant Part)
+
+services:
+  django:
+    build: .
+    container_name: soloai_django
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+
+- Strapi, Mautic, and DB remain unchanged.
+
+12. .env Example
+
+BASE_PATH=/absolute/path/to/docker-volumes
+DJANGO_SECRET_KEY=super-secret-key
+DJANGO_DEBUG=True
+DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
+
+
+13. Run Everything
+
+docker compose up -d
+
+14. Paraglide vs Django i18n (Truth Table)
+
+| Feature                | Paraglide | Django |
+| ---------------------- | --------- | ------ |
+| Language pre-selection | ✅         | ✅      |
+| Static analysis        | ✅         | ❌      |
+| Server-side rendering  | ⚠️        | ✅      |
+| SEO-ready URLs         | ⚠️        | ✅      |
+| Admin translation      | ❌         | ✅      |
+| Production stability   | ⚠️        | ✅      |
+| Enterprise adoption    | ⚠️        | ✅      |
