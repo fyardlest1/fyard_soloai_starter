@@ -37,6 +37,12 @@ When prompted, select the following options:
 - **Paraglide**: Yes
   - Languages: `en, fr, hi, es, pt, de, it, ur, fi, nb, ar, ru`
 - **MCP**: Yes
+- **Tailwind**: typography, forms
+- **SvelteKit Adapter**: auto
+- **Paraglide demo**: No
+- **mcp client**: Claude code, Gemini
+- **mcp setup**: Remote
+- **package manager**: npm
 
 This will set up your SvelteKit project with internationalization support for 12 languages and all necessary development tools.
 
